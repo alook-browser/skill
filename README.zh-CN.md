@@ -10,7 +10,7 @@
 
 发送给你的 AI Agent：
 
-> 请将 https://github.com/alook-browser/skill 中的官方 Alook Browser Skill 安装到当前 AI Agent 的用户级 Skill 目录，并将目录命名为 `alook`。安装完成后确认 Skill 可用。
+> 请将 https://github.com/alook-browser/skill 中的官方 Alook Browser Skill 安装到当前 AI Agent 的用户级 Skill 目录，并将目录命名为 `alook`。为当前 Agent 启用，确认 `alook` 出现在可用 Skill 列表中。
 
 可选命令行安装需要 Node.js 22.20.0 或更高版本：
 

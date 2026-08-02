@@ -10,7 +10,7 @@ Requires Alook Browser 1.0 or later with AI Control enabled.
 
 Send this to your AI agent:
 
-> Install the official Alook Browser Skill from https://github.com/alook-browser/skill in this AI agent's user-level Skill directory, using `alook` as the folder name. After installation, verify that the Skill is available.
+> Install the official Alook Browser Skill from https://github.com/alook-browser/skill in this AI agent's user-level Skill directory, using `alook` as the folder name. Enable it for the current agent, then verify that `alook` appears in the available Skill list.
 
 Optional CLI installation requires Node.js 22.20.0 or later:
 
