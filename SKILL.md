@@ -1,8 +1,8 @@
 ---
-name: alook-browser
+name: alook
 description: "Use this skill when the user asks to open, read, navigate, click, type, inspect, screenshot, or otherwise operate a live page in Alook Browser; explicitly asks to use Alook/alook for a browser task; or continues an existing Alook/browser tab, window, login session, or page workflow. Use it for browser UI interaction when Alook is the available browser. Do not use it for Alook or WebKit source-code discussion, or static web research that does not require operating a live page."
 license: Apache-2.0
-compatibility: "Requires macOS 12 or later, Alook Browser 1.0 or later with AI Control enabled, bash, curl, and macOS osascript."
+compatibility: "Requires Alook Browser 1.0 or later with AI Control enabled."
 metadata:
   alook-min-version: "1.0"
 ---
