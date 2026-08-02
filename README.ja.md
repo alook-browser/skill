@@ -10,7 +10,7 @@ AI コントロールを有効にした Alook Browser 1.0 以降が必要です�
 
 AI エージェントに送信してください：
 
-> https://github.com/alook-browser/skill の公式 Alook Browser Skill を、この AI Agent のユーザーレベル Skill ディレクトリにインストールしてください。完了後、`alook` Skill が利用できることを確認してください。
+> https://github.com/alook-browser/skill の公式 Alook Browser Skill を、この AI Agent のユーザーレベル Skill ディレクトリ内の `alook` フォルダーにインストールしてください。完了後、Skill が利用できることを確認してください。
 
 任意の CLI インストールには Node.js 22.20.0 以降が必要です：
 

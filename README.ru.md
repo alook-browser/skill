@@ -10,7 +10,7 @@
 
 Отправьте это своему ИИ-агенту:
 
-> Установите официальный Alook Browser Skill из https://github.com/alook-browser/skill в пользовательский каталог Skills этого AI Agent. После установки убедитесь, что Skill `alook` доступен.
+> Установите официальный Alook Browser Skill из https://github.com/alook-browser/skill в пользовательский каталог Skills этого AI Agent, назвав папку `alook`. После установки убедитесь, что Skill доступен.
 
 Для необязательной установки через CLI требуется Node.js 22.20.0 или новее:
 
