@@ -29,13 +29,17 @@ When present, use `error.hint` as the single-command recovery instruction.
 `field?` means optional.
 
 Auth
-No token -> `bash scripts/access.sh "<agentName>"`; read `challengeId verificationCode expiresAt`.
+Try token sources in order: `$ALOOK_ACCESS_TOKEN`, `$SKILL_ACCESS_TOKEN`, then the host agent's private persistent credential memory entry `alook.access-token`.
+For each existing token -> `bash scripts/access_info.sh --token "$TOKEN"`.
+Valid token -> pass `--token "$TOKEN"` to every command.
+`error.code=access_token_not_found` -> discard `TOKEN`; if it came from credential memory, delete `alook.access-token`; continue with the next token source.
+No valid token -> `bash scripts/access.sh "<agentName>"`; read `challengeId verificationCode expiresAt`.
 Show `verificationCode` when the host asks for confirmation.
 Then run `bash scripts/access_confirm.sh "$CHALLENGE_ID"`; read `accessToken trustMode`.
 `access_confirm.sh` blocks until approval, rejection, or expiry.
-`trustMode=once|always`; both tokens can call every public action.
-Have a token -> `bash scripts/access_info.sh --token "$TOKEN"`.
-`error.code=access_token_not_found` -> restart the no-token path.
+`trustMode=once` -> keep `accessToken` in the current agent session; Alook accepts it until Skill stops.
+`trustMode=always` -> immediately save `accessToken` as `alook.access-token` in the host agent's private persistent credential memory; this is required to reuse the trust in later agent sessions.
+Both tokens can call every public action.
 
 Task and context
 The access token is the permission boundary.
