@@ -2,6 +2,42 @@
 
 SKILL_WRAPPER_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 SKILL_WRAPPER_CORE="$SKILL_WRAPPER_DIR/skill_call.sh"
+SKILL_WRAPPER_ROOT="$(cd -- "$SKILL_WRAPPER_DIR/.." && pwd)"
+SKILL_WRAPPER_COLLECTION_DIR="$(cd -- "$SKILL_WRAPPER_ROOT/.." && pwd)"
+SKILL_ACCESS_TOKEN_FILE="${SKILL_ACCESS_TOKEN_FILE:-$SKILL_WRAPPER_COLLECTION_DIR/.alook-access-token}"
+
+skill_wrapper_read_saved_access_token() {
+  local token=""
+  [[ -r "$SKILL_ACCESS_TOKEN_FILE" ]] || return 0
+  IFS= read -r token < "$SKILL_ACCESS_TOKEN_FILE" || true
+  printf '%s' "$token"
+}
+
+skill_wrapper_default_access_token() {
+  skill_wrapper_read_saved_access_token
+}
+
+skill_wrapper_save_access_token() {
+  local token="${1:-}"
+  local temporary_file="${SKILL_ACCESS_TOKEN_FILE}.tmp.$$"
+  [[ -n "$token" ]] || return 1
+  if ! (umask 077 && printf '%s\n' "$token" > "$temporary_file"); then
+    rm -f "$temporary_file"
+    return 1
+  fi
+  if ! mv -f "$temporary_file" "$SKILL_ACCESS_TOKEN_FILE"; then
+    rm -f "$temporary_file"
+    return 1
+  fi
+}
+
+skill_wrapper_clear_saved_access_token_if_matches() {
+  local token="${1:-}"
+  local saved_token
+  saved_token="$(skill_wrapper_read_saved_access_token)"
+  [[ -n "$saved_token" && "$saved_token" == "$token" ]] || return 0
+  rm -f "$SKILL_ACCESS_TOKEN_FILE"
+}
 
 skill_wrapper_die() {
   local wrapper="${1:-skill_wrapper}"

@@ -12,7 +12,7 @@ usage() {
   echo "$USAGE" >&2
 }
 
-token="${ALOOK_ACCESS_TOKEN:-${SKILL_ACCESS_TOKEN:-}}"
+token="$(skill_wrapper_default_access_token)"
 task_id=""
 window_id=""
 split_id=""
@@ -78,7 +78,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 [[ -z "$limit" || "$limit" =~ ^-?[0-9]+$ ]] || skill_wrapper_die "$WRAPPER" "--limit must be an integer"
-[[ -n "$token" ]] || skill_wrapper_die "$WRAPPER" "missing access token; pass --token or set ALOOK_ACCESS_TOKEN"
+[[ -n "$token" ]] || skill_wrapper_die "$WRAPPER" "missing access token; pass --token or run access.sh, then access_confirm.sh"
 [[ -n "$query" ]] || skill_wrapper_die "$WRAPPER" "query is required"
 
 args=(command tab_find --token "$token")

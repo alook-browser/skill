@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/skill_wrapper_lib.sh"
+
 BASE_URL="${SKILL_BASE_URL:-http://127.0.0.1:15729}"
-DEFAULT_TOKEN="${ALOOK_ACCESS_TOKEN:-${SKILL_ACCESS_TOKEN:-}}"
+DEFAULT_TOKEN="$(skill_wrapper_default_access_token)"
 
 emit_local_error() {
   local code="${1:-operation_failed}"
@@ -170,6 +173,27 @@ else:
   [[ "$status" == "0" ]]
 }
 
+response_json_field() {
+  local response="${1:-}"
+  local field_path="${2:-}"
+  if command -v python3 >/dev/null 2>&1; then
+    printf '%s\n' "$response" | python3 -c '
+import json, sys
+value = json.load(sys.stdin)
+for key in sys.argv[1].split("."):
+    if not isinstance(value, dict) or key not in value:
+        raise SystemExit(1)
+    value = value[key]
+if isinstance(value, str):
+    print(value)
+else:
+    raise SystemExit(1)
+' "$field_path"
+    return
+  fi
+  printf '%s\n' "$response" | /usr/bin/osascript -l JavaScript -e 'ObjC.import("Foundation"); function run(argv) { var path = argv[0].split("."); var data = $.NSFileHandle.fileHandleWithStandardInput.readDataToEndOfFile; var input = ObjC.unwrap($.NSString.alloc.initWithDataEncoding(data, $.NSUTF8StringEncoding) || ""); var value = JSON.parse(input || "{}"); for (var index = 0; index < path.length; index += 1) { if (!value || typeof value !== "object" || !(path[index] in value)) { throw new Error("missing JSON field"); } value = value[path[index]]; } if (typeof value !== "string") { throw new Error("JSON field is not a string"); } return value; }' "$field_path"
+}
+
 emit_post_transport_error() {
   local curl_status="${1:-1}"
   case "$curl_status" in
@@ -210,6 +234,9 @@ post_json() {
       return 1
     fi
   fi
+  if [[ "$(response_json_field "$response" "error.code" 2>/dev/null || true)" == "access_token_not_found" ]]; then
+    skill_wrapper_clear_saved_access_token_if_matches "$token"
+  fi
   emit_json_and_status "$response"
 }
 
@@ -234,7 +261,6 @@ usage:
   bash scripts/skill_call.sh command ACTION [--token TOKEN] [--string KEY VALUE] [--int KEY VALUE] [--bool KEY VALUE] [--json KEY JSON] [--string-file KEY FILE] [--stdin-string KEY]
 env:
   SKILL_BASE_URL defaults to http://127.0.0.1:15729
-  ALOOK_ACCESS_TOKEN or SKILL_ACCESS_TOKEN can provide default token
 EOF
 }
 
@@ -302,7 +328,7 @@ command_subcommand() {
     esac
   done
 
-  [[ -n "$token" ]] || die "missing access token; pass --token or set ALOOK_ACCESS_TOKEN"
+  [[ -n "$token" ]] || die "missing access token; pass --token or run access.sh, then access_confirm.sh"
   post_triplets "/command" "$token" "${fields[@]}"
 }
 
@@ -347,7 +373,20 @@ subcommand_access_confirm() {
     esac
   done
   [[ -n "$challenge_id" ]] || die "access-confirm requires --challenge-id"
-  post_triplets "/access/confirm" "" string challengeId "$challenge_id"
+  local response trust_mode access_token
+  if ! response=$(post_triplets "/access/confirm" "" string challengeId "$challenge_id"); then
+    printf '%s\n' "$response"
+    return 1
+  fi
+  trust_mode="$(response_json_field "$response" "trustMode" 2>/dev/null || true)"
+  if [[ "$trust_mode" == "always" ]]; then
+    access_token="$(response_json_field "$response" "accessToken" 2>/dev/null || true)"
+    if ! skill_wrapper_save_access_token "$access_token"; then
+      emit_local_error "operation_failed" "Access granted but the token could not be saved" false "Make the Skill directory writable, then request access again"
+      return 1
+    fi
+  fi
+  printf '%s\n' "$response"
 }
 
 main() {

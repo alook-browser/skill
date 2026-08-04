@@ -12,7 +12,7 @@ usage() {
   echo "$USAGE" >&2
 }
 
-token="${ALOOK_ACCESS_TOKEN:-${SKILL_ACCESS_TOKEN:-}}"
+token="$(skill_wrapper_default_access_token)"
 timeout=""
 
 if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
@@ -48,7 +48,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 [[ -z "$timeout" || "$timeout" =~ ^-?[0-9]+$ ]] || skill_wrapper_die "$WRAPPER" "--timeout must be an integer"
-[[ -n "$token" ]] || skill_wrapper_die "$WRAPPER" "missing access token; pass --token or set ALOOK_ACCESS_TOKEN"
+[[ -n "$token" ]] || skill_wrapper_die "$WRAPPER" "missing access token; pass --token or run access.sh, then access_confirm.sh"
 if [[ -n "$timeout" ]] && (( timeout < 100 || timeout > 120000 )); then skill_wrapper_die "$WRAPPER" "--timeout must be between 100 and 120000 milliseconds"; fi
 
 args=(command tab_wait --token "$token")

@@ -15,7 +15,7 @@ usage() {
   echo "$USAGE" >&2
 }
 
-token="${ALOOK_ACCESS_TOKEN:-${SKILL_ACCESS_TOKEN:-}}"
+token="$(skill_wrapper_default_access_token)"
 css=""
 role=""
 name=""
@@ -119,7 +119,7 @@ done
 [[ -z "$timeout" || "$timeout" =~ ^-?[0-9]+$ ]] || skill_wrapper_die "$WRAPPER" "--timeout must be an integer"
 [[ -z "$count" || "$count" =~ ^-?[0-9]+$ ]] || skill_wrapper_die "$WRAPPER" "--count must be an integer"
 [[ -z "$stable_time" || "$stable_time" =~ ^-?[0-9]+$ ]] || skill_wrapper_die "$WRAPPER" "--stable-time must be an integer"
-[[ -n "$token" ]] || skill_wrapper_die "$WRAPPER" "missing access token; pass --token or set ALOOK_ACCESS_TOKEN"
+[[ -n "$token" ]] || skill_wrapper_die "$WRAPPER" "missing access token; pass --token or run access.sh, then access_confirm.sh"
 [[ -z "$name" || -n "$role" ]] || skill_wrapper_die "$WRAPPER" "--name requires --role"
 target_family_count=0
 [[ -n "${query:-}" ]] && ((target_family_count += 1))

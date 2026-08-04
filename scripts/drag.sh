@@ -12,7 +12,7 @@ usage() {
   echo "$USAGE" >&2
 }
 
-token="${ALOOK_ACCESS_TOKEN:-${SKILL_ACCESS_TOKEN:-}}"
+token="$(skill_wrapper_default_access_token)"
 from_json=""
 to_json=""
 steps=""
@@ -73,7 +73,7 @@ done
 
 [[ -z "$steps" || "$steps" =~ ^-?[0-9]+$ ]] || skill_wrapper_die "$WRAPPER" "--steps must be an integer"
 [[ -z "$duration_ms" || "$duration_ms" =~ ^-?[0-9]+$ ]] || skill_wrapper_die "$WRAPPER" "--duration-ms must be an integer"
-[[ -n "$token" ]] || skill_wrapper_die "$WRAPPER" "missing access token; pass --token or set ALOOK_ACCESS_TOKEN"
+[[ -n "$token" ]] || skill_wrapper_die "$WRAPPER" "missing access token; pass --token or run access.sh, then access_confirm.sh"
 
 args=(command drag --token "$token")
 args+=(--string tabId "$tab_id")

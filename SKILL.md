@@ -25,20 +25,19 @@ Failure -> `ok=false`; wrapper exit code non-zero; read `error.code error.messag
 `error.retryable=true` means the server guarantees the original command produced no side effect and can be retried unchanged.
 When the server cannot prove that guarantee, `error.retryable=false`.
 When present, use `error.hint` as the single-command recovery instruction.
-`TOKEN` defaults to `$ALOOK_ACCESS_TOKEN`, then `$SKILL_ACCESS_TOKEN`.
+Without `--token`, wrappers use the always-trust token saved by `access_confirm.sh`.
 `field?` means optional.
 
 Auth
-Try token sources in order: `$ALOOK_ACCESS_TOKEN`, `$SKILL_ACCESS_TOKEN`, then the host agent's private persistent credential memory entry `alook.access-token`.
-For each existing token -> `bash scripts/access_info.sh --token "$TOKEN"`.
-Valid token -> pass `--token "$TOKEN"` to every command.
-`error.code=access_token_not_found` -> discard `TOKEN`; if it came from credential memory, delete `alook.access-token`; continue with the next token source.
+Existing saved token -> `bash scripts/access_info.sh`.
+Valid token -> wrappers use it automatically.
+`error.code=access_token_not_found` -> wrappers remove a rejected saved token automatically; restart the no-token path.
 No valid token -> `bash scripts/access.sh "<agentName>"`; read `challengeId verificationCode expiresAt`.
 Show `verificationCode` when the host asks for confirmation.
 Then run `bash scripts/access_confirm.sh "$CHALLENGE_ID"`; read `accessToken trustMode`.
 `access_confirm.sh` blocks until approval, rejection, or expiry.
-`trustMode=once` -> keep `accessToken` in the current agent session; Alook accepts it until Skill stops.
-`trustMode=always` -> before any browser command, save `accessToken` as `alook.access-token` in the host agent's private persistent credential memory; later and remote agent sessions must reuse it because the user may be away from the Mac and unable to approve another request.
+`trustMode=once` -> pass `accessToken` with `--token` to every command in the current agent session; Alook accepts it until Skill stops.
+`trustMode=always` -> `access_confirm.sh` saves `accessToken` before returning; later and remote agent sessions reuse it automatically because the user may be away from the Mac and unable to approve another request.
 Both tokens can call every public action.
 
 Task and context

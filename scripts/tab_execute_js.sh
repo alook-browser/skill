@@ -12,7 +12,7 @@ usage() {
   echo "$USAGE" >&2
 }
 
-token="${ALOOK_ACCESS_TOKEN:-${SKILL_ACCESS_TOKEN:-}}"
+token="$(skill_wrapper_default_access_token)"
 await_promise="false"
 timeout=""
 
@@ -56,7 +56,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 [[ -z "$timeout" || "$timeout" =~ ^-?[0-9]+$ ]] || skill_wrapper_die "$WRAPPER" "--timeout must be an integer"
-[[ -n "$token" ]] || skill_wrapper_die "$WRAPPER" "missing access token; pass --token or set ALOOK_ACCESS_TOKEN"
+[[ -n "$token" ]] || skill_wrapper_die "$WRAPPER" "missing access token; pass --token or run access.sh, then access_confirm.sh"
 
 args=(command tab_execute_js --token "$token")
 args+=(--string tabId "$tab_id")

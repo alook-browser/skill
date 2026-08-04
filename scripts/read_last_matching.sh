@@ -15,7 +15,7 @@ usage() {
   echo "$USAGE" >&2
 }
 
-token="${ALOOK_ACCESS_TOKEN:-${SKILL_ACCESS_TOKEN:-}}"
+token="$(skill_wrapper_default_access_token)"
 css=""
 role=""
 name=""
@@ -87,7 +87,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 [[ -z "$text_limit" || "$text_limit" =~ ^-?[0-9]+$ ]] || skill_wrapper_die "$WRAPPER" "--text-limit must be an integer"
-[[ -n "$token" ]] || skill_wrapper_die "$WRAPPER" "missing access token; pass --token or set ALOOK_ACCESS_TOKEN"
+[[ -n "$token" ]] || skill_wrapper_die "$WRAPPER" "missing access token; pass --token or run access.sh, then access_confirm.sh"
 [[ -z "$name" || -n "$role" ]] || skill_wrapper_die "$WRAPPER" "--name requires --role"
 target_family_count=0
 [[ -n "${query:-}" ]] && ((target_family_count += 1))
