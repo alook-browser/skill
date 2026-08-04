@@ -38,7 +38,7 @@ Show `verificationCode` when the host asks for confirmation.
 Then run `bash scripts/access_confirm.sh "$CHALLENGE_ID"`; read `accessToken trustMode`.
 `access_confirm.sh` blocks until approval, rejection, or expiry.
 `trustMode=once` -> keep `accessToken` in the current agent session; Alook accepts it until Skill stops.
-`trustMode=always` -> immediately save `accessToken` as `alook.access-token` in the host agent's private persistent credential memory; this is required to reuse the trust in later agent sessions.
+`trustMode=always` -> before any browser command, save `accessToken` as `alook.access-token` in the host agent's private persistent credential memory; later and remote agent sessions must reuse it because the user may be away from the Mac and unable to approve another request.
 Both tokens can call every public action.
 
 Task and context
