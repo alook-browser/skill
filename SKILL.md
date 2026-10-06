@@ -50,7 +50,7 @@ Create a task with `task_begin.sh`; reuse it while the conversation continues th
 Passing `--task-id` to create or route actions labels created windows/splits and created or reused tabs.
 Reusing a safe tab with `--task-id` transfers that tab into the task cleanup unit.
 `task_end.sh --cleanup` closes labeled tabs and labeled windows/splits that contain no unlabeled tabs.
-If the user cancels a window close prompt, cleanup returns `operation_failed`, preserves the task and remaining resource state, and sets `error.details.reason=user_cancelled`.
+`tab_close.sh`, `window_close.sh`, `split_close.sh`, and `task_end.sh --cleanup` close directly without terminal or `beforeunload` confirmation; save needed content and finish terminal tasks before calling them.
 
 Target resolution
 Known tab -> `tab_get.sh`, `tab_select.sh`, or a tab action with its `tabId`.
@@ -217,6 +217,9 @@ Result: `tabId wentForward loadState`
 Run JavaScript when no structured action covers the operation.
 Usage: `tab_execute_js.sh <tabId> <script> [--await-promise] [--timeout MS] [--token TOKEN]`
 Result: `result`
+`--await-promise` -> pass one JavaScript expression; use an IIFE for multiple statements, such as `(async () => { return {status: "DONE"}; })()`.
+Structured result: use script `({status:"DONE"})`; read `.result.status`.
+Async timeout range is `100...30000`ms, default `10000`; timeout ends the wait, and the script may still be running. Read the target state before deciding whether to execute again.
 
 Click a target element or page point.
 Usage: `click.sh <tabId> <locator> [--button left|right] [--click-count 1|2] [--token TOKEN]`
@@ -261,6 +264,9 @@ Result: `scrolled direction amount target?`
 Wait for a target condition.
 Usage: `wait.sh <tabId> <locator> [--timeout MS] [--mode exists|visible|text|count|enabled|disabled|removed|textstable] [--text TEXT | --text-file FILE | --text-stdin] [--count N] [--stable-time MS] [--token TOKEN]`
 Result: `found waitedMs stableTimeMs?`
+`exists/removed/count` -> DOM matches; `count` waits for at least N matches, including hidden and offscreen elements.
+`visible` -> rendered within the viewport; an overlay may still cover it.
+`enabled/disabled/text/textstable` -> matching element state or text, including hidden, offscreen, and covered elements.
 
 Capture a screenshot of the page, uniquely matching target, or point.
 Usage: `screenshot.sh <tabId> [<locator>] [--point-json JSON] [--format png|jpeg] [--quality N] [--scale N] [--token TOKEN]`
@@ -298,7 +304,7 @@ Create a browser window; use without `--url` when recovering `no_active_context`
 Usage: `window_create.sh [--task-id ID] [--private] [--url URL] [--token TOKEN]`
 Result: `windowId created`
 
-Close one browser window; closes all tabs and splits in that window. User cancellation returns `operation_failed` with `error.details.reason=user_cancelled`.
+Close one browser window; closes all tabs and splits in that window.
 Usage: `window_close.sh <windowId> [--token TOKEN]`
 Result: `windowId closed`
 
@@ -314,7 +320,7 @@ Create a browser split.
 Usage: `split_create.sh [--task-id ID] [--window-id ID] [--url URL] [--token TOKEN]`
 Result: `splitId windowId created`
 
-Close one browser split; closes all tabs in that split. Closing the last split uses the window close confirmation path.
+Close one browser split; closes all tabs in that split. Closing the last split closes its window.
 Usage: `split_close.sh <splitId> [--token TOKEN]`
 Result: `splitId closed`
 
